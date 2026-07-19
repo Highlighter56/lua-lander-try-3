@@ -1471,7 +1471,7 @@ GameObject:
   - component: {fileID: 1855331928}
   m_Layer: 0
   m_Name: Platforms
-  m_TagString: Untagged
+  m_TagString: LandingPad
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1869,8 +1869,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f3ad5aa0c1bee24e95e0dca765607b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  defaultFlashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.2
+  customTagColors:
+  - targetTag: LandingPad
+    flashColor: {r: 0, g: 1, b: 0.03883648, a: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
