@@ -1873,7 +1873,7 @@ MonoBehaviour:
   flashDuration: 0.2
   customTagColors:
   - targetTag: LandingPad
-    flashColor: {r: 0, g: 1, b: 0, a: 1}
+    flashColor: {r: 0, g: 1, b: 0.019607844, a: 1}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
