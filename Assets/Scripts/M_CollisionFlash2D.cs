@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class M_CollisionFlash2D : MonoBehaviour
+public class CollisionFlash2D : MonoBehaviour
 {
     // A small helper structure to group a Tag string with a Color in the Inspector
     [System.Serializable]
@@ -59,7 +59,6 @@ public class M_CollisionFlash2D : MonoBehaviour
             // Using CompareTag is safer and faster than collidedObject.tag == ...
             if (collidedObject.CompareTag(config.targetTag))
             {
-				Debug.Log(config.flashColor);
                 return config.flashColor;
             }
         }
