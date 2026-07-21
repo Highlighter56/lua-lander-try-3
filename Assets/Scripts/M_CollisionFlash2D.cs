@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode; 
 
-public class CollisionFlash2D : MonoBehaviour
+public class CollisionFlash2D : NetworkBehaviour 
 {
-    // A small helper structure to group a Tag string with a Color in the Inspector
     [System.Serializable]
     public struct TagColorConfig
     {
@@ -17,7 +17,6 @@ public class CollisionFlash2D : MonoBehaviour
     [SerializeField] private float flashDuration = 0.2f;
 
     [Header("Custom Tag Configurations")]
-    [Tooltip("Add tags here to customize colors for landing pads, powerups, etc.")]
     [SerializeField] private List<TagColorConfig> customTagColors;
 
     private SpriteRenderer spriteRenderer;
@@ -40,10 +39,16 @@ public class CollisionFlash2D : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 1. Determine what color we should flash based on the tag
+        // So color flash only applies to a given players ship
+        if (!IsOwner)
+        {
+            // Debug.Log("NOT the Owner");
+            return;
+        } 
+        // Debug.Log("I AM the Owner");
+
         Color colorToFlash = GetColorForCollision(collision.gameObject);
 
-        // 2. Trigger the coroutine flash using that color
         if (flashCoroutine != null)
         {
             StopCoroutine(flashCoroutine);
@@ -53,17 +58,13 @@ public class CollisionFlash2D : MonoBehaviour
 
     private Color GetColorForCollision(GameObject collidedObject)
     {
-        // Loop through our list of custom tags to see if the collided object matches one
         foreach (var config in customTagColors)
         {
-            // Using CompareTag is safer and faster than collidedObject.tag == ...
             if (collidedObject.CompareTag(config.targetTag))
             {
                 return config.flashColor;
             }
         }
-
-        // Fallback color if the object is "Untagged" or not in our custom list
         return defaultFlashColor;
     }
 
