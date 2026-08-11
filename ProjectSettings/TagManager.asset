@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - LandingPad
   layers:
   - Default
   - TransparentFX
@@ -40,6 +41,15 @@ TagManager:
   m_SortingLayers:
   - name: Background
     uniqueID: 2718788895
+    locked: 0
+  - name: Terrain
+    uniqueID: 2211055303
+    locked: 0
+  - name: Pick Ups
+    uniqueID: 4234719447
+    locked: 0
+  - name: Player
+    uniqueID: 1536115001
     locked: 0
   - name: Default
     uniqueID: 0
