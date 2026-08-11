@@ -56,7 +56,7 @@ public class CollisionFlash2D : MonoBehaviour
         // Loop through our list of custom tags to see if the collided object matches one
         foreach (var config in customTagColors)
         {
-            // Using CompareTag is safer and faster than collidedObject.tag == ...
+            // if the collided objects tag is found in the list of custom color flashing tags, get the associated color
             if (collidedObject.CompareTag(config.targetTag))
             {
                 return config.flashColor;
