@@ -5,6 +5,8 @@ using UnityEngine;
 
 public static class DevTools
 {
+
+    // ---Force Save Project---
     [MenuItem("Dev Tools/Force Save Project %#&g")]
     public static void ForceSaveProject()
     {
@@ -13,6 +15,8 @@ public static class DevTools
         Debug.Log("Dev Tools complete:\n- Saved open scenes\n- Saved assets\n- Refreshed Asset Database\nReady for Git.");
     }
 
+
+    // ---Restart Editor---
     [MenuItem("Dev Tools/Restart Editor %#&r")]
     public static void RestartEditor()
     {
@@ -44,6 +48,28 @@ public static class DevTools
         {
             Debug.LogError($"Dev Tools could not restart Unity: {exception.Message}");
         }
+    }
+
+
+    // ---Save and Close---
+    [MenuItem("Dev Tools/Save and Close %#&c")]
+    public static void SaveAndClose()
+    {
+        bool shouldClose = EditorUtility.DisplayDialog(
+            "Save and Close",
+            "Save the current project state and close the Unity editor?",
+            "Save and Close",
+            "Cancel");
+
+        if (!shouldClose)
+        {
+            return;
+        }
+
+        SaveProjectState();
+
+        Debug.Log("Dev Tools is closing the Unity editor after saving the project state.");
+        EditorApplication.delayCall += () => EditorApplication.Exit(0);
     }
 
     private static void SaveProjectState()
