@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,8 +10,11 @@ public class M_Lander : MonoBehaviour
     // private/public type name
     private Rigidbody2D landerRigidbody2D;
     private BoxCollider2D landerBoxCollider2D;
+    private Transform landerTransform;
     [SerializeField] private float upForce = 700f;
     [SerializeField] private float turnSpeed = 100f;
+    [SerializeField] private float safeLandingVelocity = 4f;
+    [SerializeField, Range(0, 180)] private float safeLandingAngle = 10f;
 
     // awake is the first thing called 
     // the awake method should be used  to get references on local game objects (game objects that this script is attached to)
@@ -18,6 +22,7 @@ public class M_Lander : MonoBehaviour
     {
         landerRigidbody2D = GetComponent<Rigidbody2D>();
         landerBoxCollider2D = GetComponent<BoxCollider2D>();
+        landerTransform = GetComponent<Transform>();
     }
 
 
@@ -26,6 +31,14 @@ public class M_Lander : MonoBehaviour
     private void Start()
     {
         // Debug.Log("Start");
+    }
+
+
+    // Update is called once per frame
+    private void Update()
+    {
+        // Debug.Log("Update");
+        // Debug.Log(transform.eulerAngles);
     }
 
 
@@ -66,9 +79,42 @@ public class M_Lander : MonoBehaviour
     }
 
 
-    // Update is called once per frame
-    private void Update()
+    // Landing Detection
+    private void OnCollisionEnter2D(Collision2D collision2D)
     {
+        // Debug.Log("Lander Collided");
+        // Debug.Log(collision2D.relativeVelocity.magnitude);
+
+        // Message
+        String result = " : You Crashed :(";
+        // Speed
+        float crashSpeed = collision2D.relativeVelocity.magnitude;
+
         
+        if (crashSpeed < safeLandingVelocity && isSafeLandingAngle())
+        {
+            result = " : Safe Landing :)";
+        }
+      
+        Debug.Log(crashSpeed.ToString("#.##") + result);
+        Debug.Log("Speed: "+crashSpeed.ToString("F1"));
+        Debug.Log("Angle: "+visualAngle().ToString("F1"));
+
     }
+
+    private bool isSafeLandingAngle()
+    {
+        float currentAngle = landerTransform.eulerAngles.z;
+        if (currentAngle <= safeLandingAngle || 360-currentAngle < safeLandingAngle)
+            return true;
+        return false;
+    }
+
+    private float visualAngle()
+    {
+        if (landerTransform.eulerAngles.z > 180)
+            return 360-landerTransform.eulerAngles.z;
+        return landerTransform.eulerAngles.z;
+    }
+
 }
