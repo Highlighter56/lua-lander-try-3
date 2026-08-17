@@ -11,8 +11,12 @@ public class M_Lander : MonoBehaviour
     private Rigidbody2D landerRigidbody2D;
     private BoxCollider2D landerBoxCollider2D;
     private Transform landerTransform;
+
+    [Header("Player Controls")]
     [SerializeField] private float upForce = 700f;
     [SerializeField] private float turnSpeed = 100f;
+
+    [Header("Landing Parameters")]
     [SerializeField] private float safeLandingVelocity = 4f;
     [SerializeField, Range(0, 180)] private float safeLandingAngle = 10f;
 
@@ -86,20 +90,20 @@ public class M_Lander : MonoBehaviour
         // Debug.Log(collision2D.relativeVelocity.magnitude);
 
         // Message
-        String result = " : You Crashed :(";
+        String result = "You Crashed :(";
         // Speed
         float crashSpeed = collision2D.relativeVelocity.magnitude;
 
-        
-        if (crashSpeed < safeLandingVelocity && isSafeLandingAngle())
+        if (crashSpeed < safeLandingVelocity && isSafeLandingAngle() && isALandingPad(collision2D))
         {
-            result = " : Safe Landing :)";
+            result = "Safe Landing :)";
         }
       
         // Printing with Multiple Debug.Logs
-        Debug.Log(crashSpeed.ToString("#.##") + result);
-        Debug.Log("Speed: "+crashSpeed.ToString("F1"));
-        Debug.Log("Angle: "+visualAngle().ToString("F1"));
+        Debug.Log(result);
+        Debug.Log("    Speed: "+crashSpeed.ToString("F2"));
+        Debug.Log("    Angle: "+visualAngle().ToString("#.##"));
+        Debug.Log("    Tag: "+collision2D.gameObject.tag);
 
         // Printing only 1 Debug.Log
         // Debug.Log(
@@ -108,6 +112,17 @@ public class M_Lander : MonoBehaviour
         //     Angle: " + visualAngle().ToString("F1")
         // );
 
+    }
+
+    private bool isALandingPad(Collision2D collision2D)
+    {
+        if(collision2D.gameObject.CompareTag("LandingPad"))
+        {
+            // Debug.Log("Is a Landing Pad");
+            return true;
+        }
+        // Debug.Log("Not a Landing Pad");
+        return false;
     }
 
     private bool isSafeLandingAngle()

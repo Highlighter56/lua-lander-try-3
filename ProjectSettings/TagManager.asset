@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 3
   tags:
   - LandingPad
+  - Background
+  - PickUp
+  - Terrain
   layers:
   - Default
   - TransparentFX
