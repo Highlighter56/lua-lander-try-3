@@ -96,9 +96,17 @@ public class M_Lander : MonoBehaviour
             result = " : Safe Landing :)";
         }
       
+        // Printing with Multiple Debug.Logs
         Debug.Log(crashSpeed.ToString("#.##") + result);
         Debug.Log("Speed: "+crashSpeed.ToString("F1"));
         Debug.Log("Angle: "+visualAngle().ToString("F1"));
+
+        // Printing only 1 Debug.Log
+        // Debug.Log(
+        //     crashSpeed.ToString("#.##") + result + @"
+        //     Speed: " + crashSpeed.ToString("F1")+ @"
+        //     Angle: " + visualAngle().ToString("F1")
+        // );
 
     }
 
