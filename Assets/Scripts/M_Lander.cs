@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SocialPlatforms.Impl;
 
 // ... : MonoBehaviour is a base class from which every Unity script derives. When you create a new C# script in Unity, it automatically inherits from MonoBehaviour, allowing it to be attached to GameObjects and participate in the Unity lifecycle (Start, Update, etc.).
 public class M_Lander : MonoBehaviour
@@ -89,38 +90,47 @@ public class M_Lander : MonoBehaviour
         // Debug.Log("Lander Collided");
         // Debug.Log(collision2D.relativeVelocity.magnitude);
 
-        // Check Speed
-        if (!isASafeLandingSpeed(collision2D))
+        float landingScore = 100;
+        float crashSpeed = collision2D.relativeVelocity.magnitude;
+        float currentAngle = landerTransform.eulerAngles.z;
+        float verticleOffset = Math.Abs(Math.Abs(currentAngle-180)-180);
+
+        // Check Surface
+        if (!collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPad))
         {
-            printLanding(collision2D, "Crash : Landing was too Fast :(");
+            printLanding(0, collision2D, "Crash : Not a Landing Pad :(");
+            return;
+        }
+
+        // Check Speed
+        if (crashSpeed > safeLandingVelocity)
+        {
+            printLanding(0, collision2D, "Crash : Landing was too Fast :(");
             return;
         }
 
         // Check Angle
-        if (!isSafeLandingAngle())
+        if (verticleOffset > safeLandingAngle)
         {
-            printLanding(collision2D, "Crash : Landing Angle is not Safe :(");
+            printLanding(0, collision2D, "Crash : Landing Angle is not Safe :(");
             return;
         }
 
-        // Check Surface
-        if (!isALandingPad(collision2D))
-        {
-            printLanding(collision2D, "Crash : Not a Landing Pad :(");
-            return;
-        }
-
-        printLanding(collision2D, "Landed! : Landing was Safe :)");
+        // Successfull Landing!
+        landingScore -= crashSpeed / safeLandingVelocity * 50;
+        landingScore -= verticleOffset / safeLandingAngle * 50;
+        printLanding(landingScore, collision2D, "Landed! : Landing was Safe :)");
         return;
     }
 
-    private void printLanding(Collision2D collision2D, String result)
+    private void printLanding(float score, Collision2D collision2D, String result)
     {
         // Printing with Multiple Debug.Logs
         Debug.Log(result);
+        Debug.Log($"    Score: {score}");
         Debug.Log("    Speed: "+collision2D.relativeVelocity.magnitude.ToString("F2"));
         Debug.Log("    Angle: "+visualAngle().ToString("#.##"));
-        Debug.Log("    Has Landing Pad Identifyer Class: "+collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad M_IdentifyLandingPad));
+        Debug.Log($"    Has Landing Pad Identifyer Class: {collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPad)}");
 
         // Printing only 1 Debug.Log
         // Debug.Log(
@@ -130,39 +140,46 @@ public class M_Lander : MonoBehaviour
         // );
     }
 
-    private bool isASafeLandingSpeed(Collision2D collision2D)
-    {
-        float crashSpeed = collision2D.relativeVelocity.magnitude;
+    // private bool isASafeLandingSpeed(Collision2D collision2D)
+    // {
+    //     float crashSpeed = collision2D.relativeVelocity.magnitude;
 
-        if (crashSpeed < safeLandingVelocity)
-            return true;
-        return false;
-    }
+    //     if (crashSpeed < safeLandingVelocity)
+    //         return true;
+    //     return false;
+    // }
 
-    private bool isALandingPad(Collision2D collision2D)
-    {
-        // Utelizing Identifier Classes
-        if (collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad M_IdentifyLandingPad))
-            return true;
-        return false;
+    // private bool isALandingPad(Collision2D collision2D)
+    // {
+    //     // Utelizing Identifier Classes
+    //     if (collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPad))
+    //         return true;
+    //     return false;
 
-        // Utelizing Tags
-        // if(collision2D.gameObject.CompareTag("LandingPad"))
-        // {
-        //     // Debug.Log("Is a Landing Pad");
-        //     return true;
-        // }
-        // // Debug.Log("Not a Landing Pad");
-        // return false;
-    }
+    //     // Utelizing Tags
+    //     // if(collision2D.gameObject.CompareTag("LandingPad"))
+    //     // {
+    //     //     // Debug.Log("Is a Landing Pad");
+    //     //     return true;
+    //     // }
+    //     // // Debug.Log("Not a Landing Pad");
+    //     // return false;
+    // }
 
-    private bool isSafeLandingAngle()
-    {
-        float currentAngle = landerTransform.eulerAngles.z;
-        if (currentAngle <= safeLandingAngle || 360-currentAngle < safeLandingAngle)
-            return true;
-        return false;
-    }
+    // private bool isSafeLandingAngle()
+    // {
+    //     // Method 2
+    //     float currentAngle = landerTransform.eulerAngles.z;
+    //     if (Math.Abs(Math.Abs(currentAngle-180)-180) < safeLandingAngle)
+    //         return true;
+    //     return false;
+        
+    //     // Method 1
+    //     // float currentAngle = landerTransform.eulerAngles.z;
+    //     // if (currentAngle <= safeLandingAngle || 360-currentAngle < safeLandingAngle)
+    //     //     return true;
+    //     // return false;
+    // }
 
     private float visualAngle()
     {
