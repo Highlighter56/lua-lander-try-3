@@ -94,9 +94,11 @@ public class M_Lander : MonoBehaviour
         float crashSpeed = collision2D.relativeVelocity.magnitude;
         float currentAngle = landerTransform.eulerAngles.z;
         float verticleOffset = Math.Abs(Math.Abs(currentAngle-180)-180);
+        int maxSpeedEffectOnScore = 50;
+        int maxAngleEffectOnScore = 50;
 
         // Check Surface
-        if (!collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPad))
+        if (!collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPadScript))
         {
             printLanding(0, collision2D, "Crash : Not a Landing Pad :(");
             return;
@@ -117,8 +119,10 @@ public class M_Lander : MonoBehaviour
         }
 
         // Successfull Landing!
-        landingScore -= crashSpeed / safeLandingVelocity * 50;
-        landingScore -= verticleOffset / safeLandingAngle * 50;
+        landingScore -= crashSpeed / safeLandingVelocity * maxSpeedEffectOnScore;
+        landingScore -= verticleOffset / safeLandingAngle * maxAngleEffectOnScore;
+        // this varialbe is assigned during the check surface check
+        landingScore *= landingPadScript.getScoreMultiplyer();
         printLanding(landingScore, collision2D, "Landed! : Landing was Safe :)");
         return;
     }
@@ -127,9 +131,9 @@ public class M_Lander : MonoBehaviour
     {
         // Printing with Multiple Debug.Logs
         Debug.Log(result);
-        Debug.Log($"    Score: {score}");
-        Debug.Log("    Speed: "+collision2D.relativeVelocity.magnitude.ToString("F2"));
-        Debug.Log("    Angle: "+visualAngle().ToString("#.##"));
+        Debug.Log($"    Score: {score.ToString("#.##")}");
+        Debug.Log($"    Speed: {collision2D.relativeVelocity.magnitude.ToString("F2")}");
+        Debug.Log($"    Angle: {visualAngle().ToString("#.##")}");
         Debug.Log($"    Has Landing Pad Identifyer Class: {collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPad)}");
 
         // Printing only 1 Debug.Log
