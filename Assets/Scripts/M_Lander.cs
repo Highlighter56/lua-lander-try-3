@@ -89,21 +89,38 @@ public class M_Lander : MonoBehaviour
         // Debug.Log("Lander Collided");
         // Debug.Log(collision2D.relativeVelocity.magnitude);
 
-        // Message
-        String result = "You Crashed :(";
-        // Speed
-        float crashSpeed = collision2D.relativeVelocity.magnitude;
-
-        if (crashSpeed < safeLandingVelocity && isSafeLandingAngle() && isALandingPad(collision2D))
+        // Check Speed
+        if (!isASafeLandingSpeed(collision2D))
         {
-            result = "Safe Landing :)";
+            printLanding(collision2D, "Crash : Landing was too Fast :(");
+            return;
         }
-      
+
+        // Check Angle
+        if (!isSafeLandingAngle())
+        {
+            printLanding(collision2D, "Crash : Landing Angle is not Safe :(");
+            return;
+        }
+
+        // Check Surface
+        if (!isALandingPad(collision2D))
+        {
+            printLanding(collision2D, "Crash : Not a Landing Pad :(");
+            return;
+        }
+
+        printLanding(collision2D, "Landed! : Landing was Safe :)");
+        return;
+    }
+
+    private void printLanding(Collision2D collision2D, String result)
+    {
         // Printing with Multiple Debug.Logs
         Debug.Log(result);
-        Debug.Log("    Speed: "+crashSpeed.ToString("F2"));
+        Debug.Log("    Speed: "+collision2D.relativeVelocity.magnitude.ToString("F2"));
         Debug.Log("    Angle: "+visualAngle().ToString("#.##"));
-        Debug.Log("    Tag: "+collision2D.gameObject.tag);
+        Debug.Log("    Has Landing Pad Identifyer Class: "+collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad M_IdentifyLandingPad));
 
         // Printing only 1 Debug.Log
         // Debug.Log(
@@ -111,18 +128,32 @@ public class M_Lander : MonoBehaviour
         //     Speed: " + crashSpeed.ToString("F1")+ @"
         //     Angle: " + visualAngle().ToString("F1")
         // );
+    }
 
+    private bool isASafeLandingSpeed(Collision2D collision2D)
+    {
+        float crashSpeed = collision2D.relativeVelocity.magnitude;
+
+        if (crashSpeed < safeLandingVelocity)
+            return true;
+        return false;
     }
 
     private bool isALandingPad(Collision2D collision2D)
     {
-        if(collision2D.gameObject.CompareTag("LandingPad"))
-        {
-            // Debug.Log("Is a Landing Pad");
+        // Utelizing Identifier Classes
+        if (collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad M_IdentifyLandingPad))
             return true;
-        }
-        // Debug.Log("Not a Landing Pad");
         return false;
+
+        // Utelizing Tags
+        // if(collision2D.gameObject.CompareTag("LandingPad"))
+        // {
+        //     // Debug.Log("Is a Landing Pad");
+        //     return true;
+        // }
+        // // Debug.Log("Not a Landing Pad");
+        // return false;
     }
 
     private bool isSafeLandingAngle()

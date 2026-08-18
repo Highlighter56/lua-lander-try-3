@@ -48,6 +48,9 @@ TagManager:
   - name: Terrain
     uniqueID: 2211055303
     locked: 0
+  - name: LandingPad
+    uniqueID: 4101193659
+    locked: 0
   - name: Pick Ups
     uniqueID: 4234719447
     locked: 0
