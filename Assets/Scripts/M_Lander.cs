@@ -1,11 +1,19 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SocialPlatforms.Impl;
 
 // ... : MonoBehaviour is a base class from which every Unity script derives. When you create a new C# script in Unity, it automatically inherits from MonoBehaviour, allowing it to be attached to GameObjects and participate in the Unity lifecycle (Start, Update, etc.).
 public class M_Lander : MonoBehaviour
 {
+
+
+    public event EventHandler OnUpForce;
+    public event EventHandler OnLeftForce;
+    public event EventHandler OnRightForce;
+
+
 
     // ---Class Variables---
     // private/public type name
@@ -68,18 +76,21 @@ public class M_Lander : MonoBehaviour
         {
             // Debug.Log("Up");
             landerRigidbody2D.AddForce(upForce * transform.up * Time.deltaTime);
+            OnUpForce?.Invoke(this, EventArgs.Empty);
         }
         // Left
         if (Keyboard.current.leftArrowKey.IsPressed() || Keyboard.current.aKey.IsPressed())
         {
             // Debug.Log("Left");
             landerRigidbody2D.AddTorque(turnSpeed * Time.deltaTime);
+            OnLeftForce?.Invoke(this, EventArgs.Empty);
         }
         // Right
         if (Keyboard.current.rightArrowKey.IsPressed() || Keyboard.current.dKey.IsPressed())
         {
             // Debug.Log("Right");
             landerRigidbody2D.AddTorque(-(turnSpeed) * Time.deltaTime);
+            OnRightForce?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -100,21 +111,21 @@ public class M_Lander : MonoBehaviour
         // Check Surface
         if (!collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPadScript))
         {
-            printLanding(0, collision2D, "Crash : Not a Landing Pad :(");
+            printLanding(0.00f, collision2D, "Crash : Not a Landing Pad :(");
             return;
         }
 
         // Check Speed
         if (crashSpeed > safeLandingVelocity)
         {
-            printLanding(0, collision2D, "Crash : Landing was too Fast :(");
+            printLanding(0.00f, collision2D, "Crash : Landing was too Fast :(");
             return;
         }
 
         // Check Angle
         if (verticleOffset > safeLandingAngle)
         {
-            printLanding(0, collision2D, "Crash : Landing Angle is not Safe :(");
+            printLanding(0.00f, collision2D, "Crash : Landing Angle is not Safe :(");
             return;
         }
 
