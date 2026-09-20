@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -8,27 +9,29 @@ using UnityEngine.SocialPlatforms.Impl;
 public class M_Lander : MonoBehaviour
 {
 
-	// ---Creating the Events---
+	// ---Instantiating Events---
     public event EventHandler OnUpForce;
     public event EventHandler OnLeftForce;
     public event EventHandler OnRightForce;
     public event EventHandler OnBeforeForce;
 
 
-
-    // ---Class Variables---
+    // ---GameObject Components---
     // private/public type name
     private Rigidbody2D landerRigidbody2D;
     private BoxCollider2D landerBoxCollider2D;
     private Transform landerTransform;
 
+	[SerializeField] private float fuelAmount = 10f;
+	[SerializeField] private float fuelConsumption = 1f;
+
     [Header("Player Controls")]
-    [SerializeField] private float upForce = 700f;
-    [SerializeField] private float turnSpeed = 100f;
+		[SerializeField] private float upForce = 700f;
+		[SerializeField] private float turnSpeed = 100f;
 
     [Header("Landing Parameters")]
-    [SerializeField] private float safeLandingVelocity = 4f;
-    [SerializeField, Range(0, 180)] private float safeLandingAngle = 10f;
+		[SerializeField] private float safeLandingVelocity = 4f;
+		[SerializeField, Range(0, 180)] private float safeLandingAngle = 10f;
 
     // awake is the first thing called 
     // the awake method should be used  to get references on local game objects (game objects that this script is attached to)
@@ -72,14 +75,30 @@ public class M_Lander : MonoBehaviour
         // }
 
 
+
 		// Unless an input is pressed, turn off thruster visuals
 		OnBeforeForce?.Invoke(this, EventArgs.Empty);
+
+		// If were out of fuel, then leave this function : skips all the input code
+		if(fuelAmount<=0)
+		{
+			Debug.Log("Out of Fuel :(");
+			return;
+		}
+
+		// If any directional key is pressed, then set to true : When its true, fuel will be consumed
+		bool isMoving = false;
+		Debug.Log($"Fuel: {fuelAmount}");
+
 
         // New Input System
         // Up
         if (Keyboard.current.upArrowKey.IsPressed() || Keyboard.current.wKey.IsPressed())
         {
-            // Debug.Log("Up");
+            Debug.Log("Up");
+			// Lander is Moving
+			isMoving = true;
+			// Add directional Force
             landerRigidbody2D.AddForce(upForce * transform.up * Time.deltaTime);
 			// ? - This just makes sure anything to the left is not null (the event exist)
             OnUpForce?.Invoke(this, EventArgs.Empty);
@@ -87,17 +106,25 @@ public class M_Lander : MonoBehaviour
         // Left
         if (Keyboard.current.leftArrowKey.IsPressed() || Keyboard.current.aKey.IsPressed())
         {
-            // Debug.Log("Left");
+            Debug.Log("Left");
+			isMoving = true;
             landerRigidbody2D.AddTorque(turnSpeed * Time.deltaTime);
             OnLeftForce?.Invoke(this, EventArgs.Empty);
         }
         // Right
         if (Keyboard.current.rightArrowKey.IsPressed() || Keyboard.current.dKey.IsPressed())
         {
-            // Debug.Log("Right");
+            Debug.Log("Right");
+			isMoving = true;
             landerRigidbody2D.AddTorque(-(turnSpeed) * Time.deltaTime);
             OnRightForce?.Invoke(this, EventArgs.Empty);
         }
+
+		// Use Fuel
+		if(isMoving)
+		{
+			fuelAmount -= fuelConsumption * Time.deltaTime;
+		}
     }
 
 
@@ -124,21 +151,21 @@ public class M_Lander : MonoBehaviour
         if (!collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPadScript))
         {
 			// landingPadScript.getScoreMultiplyer();
-            printLanding(0.00f, collision2D, "Crash : Not a Landing Pad :(");
+            PrintLanding(0.00f, collision2D, "Crash : Not a Landing Pad :(");
             return;
         }
 
         // Check Speed
         if (crashSpeed > safeLandingVelocity)
         {
-            printLanding(0.00f, collision2D, "Crash : Landing was too Fast :(");
+            PrintLanding(0.00f, collision2D, "Crash : Landing was too Fast :(");
             return;
         }
 
         // Check Angle
         if (verticleOffset > safeLandingAngle)
         {
-            printLanding(0.00f, collision2D, "Crash : Landing Angle is not Safe :(");
+            PrintLanding(0.00f, collision2D, "Crash : Landing Angle is not Safe :(");
             return;
         }
 
@@ -147,29 +174,47 @@ public class M_Lander : MonoBehaviour
         landingScore -= verticleOffset / safeLandingAngle * maxAngleEffectOnScore;
         // this varialbe is assigned during the check surface check
         landingScore *= landingPadScript.getScoreMultiplyer();
-        printLanding(landingScore, collision2D, "Landed! : Landing was Safe :)");
+        PrintLanding(landingScore, collision2D, "Landed! : Landing was Safe :)");
         return;
     }
 
-    private void printLanding(float score, Collision2D collision2D, String result)
+
+	// Built in Unity Method that is called when a trigger is entered
+	private void OnTriggerEnter2D(Collider2D collider2d)
+	{
+		// If the trigger is fuelPickUp
+		if(collider2d.gameObject.TryGetComponent(out M_FuelPickUp fuelPickUp))
+		{
+			OnFulePickUp(fuelPickUp);
+		}	
+	}
+
+	private void OnFulePickUp(M_FuelPickUp fuelPickUp)
+	{
+		fuelAmount += fuelPickUp.getRefuelAmount();
+		fuelPickUp.DestroySelf();
+	}
+
+
+	private void PrintLanding(float score, Collision2D collision2D, String result)
     {
         // Printing with Multiple Debug.Logs
         Debug.Log(result);
         Debug.Log($"    Score: {score.ToString("#.##")}");
         Debug.Log($"    Speed: {collision2D.relativeVelocity.magnitude.ToString("F2")}");
-        Debug.Log($"    Angle: {visualAngle().ToString("#.##")}");
+        Debug.Log($"    Angle: {VisualAngle().ToString("#.##")}");
         Debug.Log($"    Has Landing Pad Identifyer Class: {collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPad)}");
 
         // Printing only 1 Debug.Log
         // Debug.Log(
         //     crashSpeed.ToString("#.##") + result + @"
         //     Speed: " + crashSpeed.ToString("F1")+ @"
-        //     Angle: " + visualAngle().ToString("F1")
+        //     Angle: " + VisualAngle().ToString("F1")
         // );
     }
 
 
-    private float visualAngle()
+    private float VisualAngle()
     {
         if (landerTransform.eulerAngles.z > 180)
             return 360-landerTransform.eulerAngles.z;
