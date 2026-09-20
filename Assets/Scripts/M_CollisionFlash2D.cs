@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CollisionFlash2D : MonoBehaviour
+public class M_CollisionFlash2D : MonoBehaviour
 {
     // A small helper structure to group a Tag string with a Color in the Inspector
     [System.Serializable]
@@ -26,6 +26,10 @@ public class CollisionFlash2D : MonoBehaviour
 
     private void Start()
     {
+		/*
+			Because its good practice to seperate the visuals (sprites) from the logic (I/O,...), 
+			SpriteRenderer's are often located on child objects. 
+		*/
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer == null)
         {
@@ -38,6 +42,7 @@ public class CollisionFlash2D : MonoBehaviour
         }
     }
 
+	// This is a Built in Unity Method that gets called when 2D collisiosn occur
     private void OnCollisionEnter2D(Collision2D collision)
     {
         // 1. Determine what color we should flash based on the tag

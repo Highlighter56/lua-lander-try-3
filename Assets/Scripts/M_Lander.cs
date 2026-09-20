@@ -8,10 +8,11 @@ using UnityEngine.SocialPlatforms.Impl;
 public class M_Lander : MonoBehaviour
 {
 
-
+	// ---Creating the Events---
     public event EventHandler OnUpForce;
     public event EventHandler OnLeftForce;
     public event EventHandler OnRightForce;
+    public event EventHandler OnBeforeForce;
 
 
 
@@ -40,7 +41,7 @@ public class M_Lander : MonoBehaviour
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created / is called after awake
-    // the start method should be used to get commponent references to externam game objects (components on gameobject that the script isnt direclty attached to)
+    // the start method should be used to get commponent references to external game objects (components on gameobject that the script isnt direclty attached to)
     private void Start()
     {
         // Debug.Log("Start");
@@ -70,12 +71,17 @@ public class M_Lander : MonoBehaviour
         //     Debug.Log("Up");
         // }
 
+
+		// Unless an input is pressed, turn off thruster visuals
+		OnBeforeForce?.Invoke(this, EventArgs.Empty);
+
         // New Input System
         // Up
         if (Keyboard.current.upArrowKey.IsPressed() || Keyboard.current.wKey.IsPressed())
         {
             // Debug.Log("Up");
             landerRigidbody2D.AddForce(upForce * transform.up * Time.deltaTime);
+			// ? - This just makes sure anything to the left is not null (the event exist)
             OnUpForce?.Invoke(this, EventArgs.Empty);
         }
         // Left
@@ -109,8 +115,15 @@ public class M_Lander : MonoBehaviour
         int maxAngleEffectOnScore = 50;
 
         // Check Surface
+		/*
+			Out Parameter Keyword
+				Turns a non-bool method into a bool method, while still returning the intended value of the function
+				In this case we dont need to use 'landingPadScript', but as seen in the comment, the variable name is 
+				directly in the method call, and then can be used there after
+		*/
         if (!collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPadScript))
         {
+			// landingPadScript.getScoreMultiplyer();
             printLanding(0.00f, collision2D, "Crash : Not a Landing Pad :(");
             return;
         }
@@ -155,46 +168,6 @@ public class M_Lander : MonoBehaviour
         // );
     }
 
-    // private bool isASafeLandingSpeed(Collision2D collision2D)
-    // {
-    //     float crashSpeed = collision2D.relativeVelocity.magnitude;
-
-    //     if (crashSpeed < safeLandingVelocity)
-    //         return true;
-    //     return false;
-    // }
-
-    // private bool isALandingPad(Collision2D collision2D)
-    // {
-    //     // Utelizing Identifier Classes
-    //     if (collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPad))
-    //         return true;
-    //     return false;
-
-    //     // Utelizing Tags
-    //     // if(collision2D.gameObject.CompareTag("LandingPad"))
-    //     // {
-    //     //     // Debug.Log("Is a Landing Pad");
-    //     //     return true;
-    //     // }
-    //     // // Debug.Log("Not a Landing Pad");
-    //     // return false;
-    // }
-
-    // private bool isSafeLandingAngle()
-    // {
-    //     // Method 2
-    //     float currentAngle = landerTransform.eulerAngles.z;
-    //     if (Math.Abs(Math.Abs(currentAngle-180)-180) < safeLandingAngle)
-    //         return true;
-    //     return false;
-        
-    //     // Method 1
-    //     // float currentAngle = landerTransform.eulerAngles.z;
-    //     // if (currentAngle <= safeLandingAngle || 360-currentAngle < safeLandingAngle)
-    //     //     return true;
-    //     // return false;
-    // }
 
     private float visualAngle()
     {
