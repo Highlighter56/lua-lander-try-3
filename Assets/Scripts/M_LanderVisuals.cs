@@ -38,10 +38,12 @@ public class M_LanderVisuals : MonoBehaviour
 	private void Lander_OnLeftForce(object sender, System.EventArgs e)
 	{
 		SetParticleSystem(rightThruster, true);
+		SetParticleSystem(leftThruster, false);
 	}
 	private void Lander_OnRightForce(object sender, System.EventArgs e)
 	{
 		SetParticleSystem(leftThruster, true);
+		SetParticleSystem(rightThruster, false);
 	}
 
 	// Turn On Off a Thruster
