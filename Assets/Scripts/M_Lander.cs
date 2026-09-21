@@ -9,11 +9,30 @@ using UnityEngine.SocialPlatforms.Impl;
 public class M_Lander : MonoBehaviour
 {
 
+	/*
+		Singelton Pattern
+		 - Useful for when you only have one of something in an entier game
+		the {  } means there is a public get (anyone can get this) and
+		a private set (only this class can set this instance)
+	*/
+	public static M_Lander Instance { get; private set; }
+
+
 	// ---Instantiating Events---
     public event EventHandler OnUpForce;
     public event EventHandler OnLeftForce;
     public event EventHandler OnRightForce;
     public event EventHandler OnBeforeForce;
+	// How to attach a parameter to signals
+	public event EventHandler<int> OnCollectCoin;
+	// here we are attached a class to a signal, which contains data
+	public event EventHandler<OnLandingEventArgs> OnLanding;
+	// Creating a class/object that extends EventArgs, so we can pass parameters through signals
+	public class OnLandingEventArgs : EventArgs
+	{
+		public float score;
+	}
+	
 
 
     // ---GameObject Components---
@@ -21,6 +40,8 @@ public class M_Lander : MonoBehaviour
     private Rigidbody2D landerRigidbody2D;
     private BoxCollider2D landerBoxCollider2D;
     private Transform landerTransform;
+
+
 
 	[SerializeField] private float fuelAmount = 10f;
 	[SerializeField] private float fuelConsumption = 1f;
@@ -37,6 +58,9 @@ public class M_Lander : MonoBehaviour
     // the awake method should be used  to get references on local game objects (game objects that this script is attached to)
     private void Awake()
     {
+		// Set Instance
+		Instance = this;
+		// Get Components
         landerRigidbody2D = GetComponent<Rigidbody2D>();
         landerBoxCollider2D = GetComponent<BoxCollider2D>();
         landerTransform = GetComponent<Transform>();
@@ -87,17 +111,17 @@ public class M_Lander : MonoBehaviour
 		}
 
 		// If any directional key is pressed, then set to true : When its true, fuel will be consumed
-		bool isMoving = false;
-		Debug.Log($"Fuel: {fuelAmount}");
+		bool usingFuel = false;
+		// Debug.Log($"Fuel: {fuelAmount}");
 
 
         // New Input System
         // Up
         if (Keyboard.current.upArrowKey.IsPressed() || Keyboard.current.wKey.IsPressed())
         {
-            Debug.Log("Up");
+            // Debug.Log("Up");
 			// Lander is Moving
-			isMoving = true;
+			usingFuel = true;
 			// Add directional Force
             landerRigidbody2D.AddForce(upForce * transform.up * Time.deltaTime);
 			// ? - This just makes sure anything to the left is not null (the event exist)
@@ -106,22 +130,22 @@ public class M_Lander : MonoBehaviour
         // Left
         if (Keyboard.current.leftArrowKey.IsPressed() || Keyboard.current.aKey.IsPressed())
         {
-            Debug.Log("Left");
-			isMoving = true;
+            // Debug.Log("Left");
+			usingFuel = true;
             landerRigidbody2D.AddTorque(turnSpeed * Time.deltaTime);
             OnLeftForce?.Invoke(this, EventArgs.Empty);
         }
         // Right
         if (Keyboard.current.rightArrowKey.IsPressed() || Keyboard.current.dKey.IsPressed())
         {
-            Debug.Log("Right");
-			isMoving = true;
+            // Debug.Log("Right");
+			usingFuel = true;
             landerRigidbody2D.AddTorque(-(turnSpeed) * Time.deltaTime);
             OnRightForce?.Invoke(this, EventArgs.Empty);
         }
 
 		// Use Fuel
-		if(isMoving)
+		if(usingFuel)
 		{
 			fuelAmount -= fuelConsumption * Time.deltaTime;
 		}
@@ -175,6 +199,9 @@ public class M_Lander : MonoBehaviour
         // this varialbe is assigned during the check surface check
         landingScore *= landingPadScript.getScoreMultiplyer();
         PrintLanding(landingScore, collision2D, "Landed! : Landing was Safe :)");
+		
+		// Invoke OnLanding Event
+		OnLanding?.Invoke(this, new OnLandingEventArgs { score = landingScore} );
         return;
     }
 
@@ -185,11 +212,22 @@ public class M_Lander : MonoBehaviour
 		// If the trigger is fuelPickUp
 		if(collider2d.gameObject.TryGetComponent(out M_FuelPickUp fuelPickUp))
 		{
-			OnFulePickUp(fuelPickUp);
-		}	
+			RefilFuel(fuelPickUp);
+		}
+		// If the trigger is CoinPickUp
+		if(collider2d.gameObject.TryGetComponent(out M_CoinPickUp coin))
+		{
+			CollectCoin(coin);
+		}
 	}
 
-	private void OnFulePickUp(M_FuelPickUp fuelPickUp)
+	private void CollectCoin(M_CoinPickUp coin)
+	{
+		OnCollectCoin?.Invoke(this, coin.getValue());
+		coin.DestroySelf();
+	}
+
+	private void RefilFuel(M_FuelPickUp fuelPickUp)
 	{
 		fuelAmount += fuelPickUp.getRefuelAmount();
 		fuelPickUp.DestroySelf();
