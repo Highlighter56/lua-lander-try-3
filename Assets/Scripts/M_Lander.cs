@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -11,9 +12,9 @@ public class M_Lander : MonoBehaviour
 
 	/*
 		Singelton Pattern
-		 - Useful for when you only have one of something in an entier game
-		the {  } means there is a public get (anyone can get this) and
-		a private set (only this class can set this instance)
+		 - Useful for when you only have one of something in a scene
+		inside the {  } you can set a public/private get and set. Not specifying (like for the get) means
+		its public. Specifying (Like for the set) means its private
 	*/
 	public static M_Lander Instance { get; private set; }
 
@@ -23,6 +24,7 @@ public class M_Lander : MonoBehaviour
     public event EventHandler OnLeftForce;
     public event EventHandler OnRightForce;
     public event EventHandler OnBeforeForce;
+	public event EventHandler OnLeftRightForce;
 	// How to attach a parameter to signals
 	public event EventHandler<int> OnCollectCoin;
 	// here we are attached a class to a signal, which contains data
@@ -42,9 +44,10 @@ public class M_Lander : MonoBehaviour
     private Transform landerTransform;
 
 
-
-	[SerializeField] private float fuelAmount = 10f;
-	[SerializeField] private float fuelConsumption = 1f;
+	// ---Seralized Variables---
+	[Header("Fuel Stats")]
+		[SerializeField] private float fuelAmount = 10f;
+		[SerializeField] private float fuelConsumptionRate = 1f;
 
     [Header("Player Controls")]
 		[SerializeField] private float upForce = 700f;
@@ -86,6 +89,11 @@ public class M_Lander : MonoBehaviour
     // This is a special Update() function that is called at a fixed interval, and is where all physics code should live
     private void FixedUpdate()
     {
+
+		// Method Variables
+		// Its bad practice to have 'magic numbers'
+		float onlyLeftRight = 0.5f;
+
         // ---Detecting Key Board Input---
         /*
         By defualt the code is set to use the New Input System. But there is also a Legacy Input Manager that 
@@ -110,54 +118,74 @@ public class M_Lander : MonoBehaviour
 			return;
 		}
 
-		// If any directional key is pressed, then set to true : When its true, fuel will be consumed
-		bool usingFuel = false;
-		// Debug.Log($"Fuel: {fuelAmount}");
+		// Use Fuel
+		if(LeftPressed() || UpPressed() || RightPressed())
+		{
+			// If any directional key is pressed, use fuel
+			fuelAmount -= fuelConsumptionRate * Time.deltaTime;
+		}
 
 
         // New Input System
-        // Up
-        if (Keyboard.current.upArrowKey.IsPressed() || Keyboard.current.wKey.IsPressed())
+		// Up
+        if (UpPressed())
         {
-            // Debug.Log("Up");
-			// Lander is Moving
-			usingFuel = true;
+            Debug.Log("Up");
 			// Add directional Force
             landerRigidbody2D.AddForce(upForce * transform.up * Time.deltaTime);
 			// ? - This just makes sure anything to the left is not null (the event exist)
             OnUpForce?.Invoke(this, EventArgs.Empty);
+			if (LeftPressed() && UpPressed() && RightPressed())
+			{
+				return;
+			}
         }
+		// Left & NOT_UP & Right
+		if (LeftPressed() && !UpPressed() && RightPressed())
+		{
+			Debug.Log("Left and Right");
+			landerRigidbody2D.AddForce(onlyLeftRight * upForce * transform.up * Time.deltaTime);
+			OnLeftRightForce?.Invoke(this, EventArgs.Empty);
+			return;
+		}
         // Left
-        if (Keyboard.current.leftArrowKey.IsPressed() || Keyboard.current.aKey.IsPressed())
+        if (LeftPressed())
         {
-            // Debug.Log("Left");
-			usingFuel = true;
+            Debug.Log("Left");
+			// Add directional Torque
             landerRigidbody2D.AddTorque(turnSpeed * Time.deltaTime);
             OnLeftForce?.Invoke(this, EventArgs.Empty);
         }
         // Right
-        if (Keyboard.current.rightArrowKey.IsPressed() || Keyboard.current.dKey.IsPressed())
+        if (RightPressed())
         {
-            // Debug.Log("Right");
-			usingFuel = true;
+            Debug.Log("Right");
             landerRigidbody2D.AddTorque(-(turnSpeed) * Time.deltaTime);
             OnRightForce?.Invoke(this, EventArgs.Empty);
         }
-
-		// Use Fuel
-		if(usingFuel)
-		{
-			fuelAmount -= fuelConsumption * Time.deltaTime;
-		}
     }
 
+	// Directional Input Methods
+	private bool LeftPressed()
+	{
+		return Keyboard.current.leftArrowKey.IsPressed() || Keyboard.current.aKey.IsPressed();
+	}
+	private bool UpPressed()
+	{
+		return Keyboard.current.upArrowKey.IsPressed() || Keyboard.current.wKey.IsPressed() || Keyboard.current.spaceKey.IsPressed();
+	}
+	private bool RightPressed()
+	{
+		return Keyboard.current.rightArrowKey.IsPressed() || Keyboard.current.dKey.IsPressed();
+	}
 
     // Landing Detection
-    private void OnCollisionEnter2D(Collision2D collision2D)
+	private void OnCollisionEnter2D(Collision2D collision2D)
     {
         // Debug.Log("Lander Collided");
         // Debug.Log(collision2D.relativeVelocity.magnitude);
 
+		// Method Variables
         float landingScore = 100;
         float crashSpeed = collision2D.relativeVelocity.magnitude;
         float currentAngle = landerTransform.eulerAngles.z;

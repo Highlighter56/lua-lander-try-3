@@ -13,8 +13,9 @@ public class M_GameManager : MonoBehaviour
 	{
 		/*
 			Because there is only one lander in this game, we can access it through its Instance
-				- (the Instance is somethign created in the Lander itself)
+				- (the Instance is somethign created in the Lander itself using hte principle of the singelton pattern)
 		*/
+		// This is the process of adding a method to an event (an event in nuity is the same thing as a signal in godot)
 		M_Lander.Instance.OnCollectCoin += AddScore;
 		M_Lander.Instance.OnLanding += AddScore;
 	}

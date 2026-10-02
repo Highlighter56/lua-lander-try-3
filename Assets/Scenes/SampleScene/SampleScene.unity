@@ -3017,7 +3017,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fuelAmount: 10
-  fuelConsumption: 1
+  fuelConsumptionRate: 1
   upForce: 700
   turnSpeed: 185
   safeLandingVelocity: 4

@@ -20,6 +20,7 @@ public class M_LanderVisuals : MonoBehaviour
 		landerScript.OnUpForce += Lander_OnUpForce;
 		landerScript.OnLeftForce += Lander_OnLeftForce;
 		landerScript.OnRightForce += Lander_OnRightForce;
+		landerScript.OnLeftRightForce += Lander_OnLeftRightForce;
 	}
 
 
@@ -45,11 +46,17 @@ public class M_LanderVisuals : MonoBehaviour
 		SetParticleSystem(leftThruster, true);
 		SetParticleSystem(rightThruster, false);
 	}
+	private void Lander_OnLeftRightForce(object sender, System.EventArgs e)
+	{
+		SetParticleSystem(leftThruster, true);
+		SetParticleSystem(rightThruster, true);
+	}
 
 	// Turn On Off a Thruster
 	private void SetParticleSystem(ParticleSystem particleSystem, bool state)
 	{
 		// For some reason this has to be split into two lines...
+		// this is the code to set the state of a particle emmision
 		ParticleSystem.EmissionModule emissionModule = particleSystem.emission;
 		emissionModule.enabled = state;
 	}
