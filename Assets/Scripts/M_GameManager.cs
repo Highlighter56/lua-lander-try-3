@@ -4,9 +4,19 @@ using UnityEngine;
 public class M_GameManager : MonoBehaviour
 {
 
+	// Singleton Pattern
+	public static M_GameManager Instance { get ; private set; }
+
 	// ---Attributes---
 	private int score;
+	private float time;
 
+
+	// ---Awake---
+	private void Awake()
+	{
+		Instance = this;
+	}
 
 	// ---Start---
 	private void Start()
@@ -18,6 +28,23 @@ public class M_GameManager : MonoBehaviour
 		// This is the process of adding a method to an event (an event in nuity is the same thing as a signal in godot)
 		M_Lander.Instance.OnCollectCoin += AddScore;
 		M_Lander.Instance.OnLanding += AddScore;
+	}
+
+	// ---Update---
+	private void Update()
+	{
+		time += Time.deltaTime;
+	}
+
+
+		// ---Getters
+	public int GetScore()
+	{
+		return score;
+	}
+	public float GetTime()
+	{
+		return time;
 	}
 
 

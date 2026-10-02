@@ -46,7 +46,8 @@ public class M_Lander : MonoBehaviour
 
 	// ---Seralized Variables---
 	[Header("Fuel Stats")]
-		[SerializeField] private float fuelAmount = 10f;
+		[SerializeField] private float fuelAmount;
+		[SerializeField] private float fuelAmountMax = 10f;
 		[SerializeField] private float fuelConsumptionRate = 1f;
 
     [Header("Player Controls")]
@@ -67,7 +68,9 @@ public class M_Lander : MonoBehaviour
         landerRigidbody2D = GetComponent<Rigidbody2D>();
         landerBoxCollider2D = GetComponent<BoxCollider2D>();
         landerTransform = GetComponent<Transform>();
-    }
+		// Set Fuel
+		fuelAmount = fuelAmountMax;
+	}
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created / is called after awake
@@ -130,7 +133,7 @@ public class M_Lander : MonoBehaviour
 		// Up
         if (UpPressed())
         {
-            Debug.Log("Up");
+            // Debug.Log("Up");
 			// Add directional Force
             landerRigidbody2D.AddForce(upForce * transform.up * Time.deltaTime);
 			// ? - This just makes sure anything to the left is not null (the event exist)
@@ -143,7 +146,7 @@ public class M_Lander : MonoBehaviour
 		// Left & NOT_UP & Right
 		if (LeftPressed() && !UpPressed() && RightPressed())
 		{
-			Debug.Log("Left and Right");
+			// Debug.Log("Left and Right");
 			landerRigidbody2D.AddForce(onlyLeftRight * upForce * transform.up * Time.deltaTime);
 			OnLeftRightForce?.Invoke(this, EventArgs.Empty);
 			return;
@@ -151,7 +154,7 @@ public class M_Lander : MonoBehaviour
         // Left
         if (LeftPressed())
         {
-            Debug.Log("Left");
+            // Debug.Log("Left");
 			// Add directional Torque
             landerRigidbody2D.AddTorque(turnSpeed * Time.deltaTime);
             OnLeftForce?.Invoke(this, EventArgs.Empty);
@@ -159,7 +162,7 @@ public class M_Lander : MonoBehaviour
         // Right
         if (RightPressed())
         {
-            Debug.Log("Right");
+            // Debug.Log("Right");
             landerRigidbody2D.AddTorque(-(turnSpeed) * Time.deltaTime);
             OnRightForce?.Invoke(this, EventArgs.Empty);
         }
@@ -203,21 +206,21 @@ public class M_Lander : MonoBehaviour
         if (!collision2D.gameObject.TryGetComponent(out M_IdentifyLandingPad landingPadScript))
         {
 			// landingPadScript.getScoreMultiplyer();
-            PrintLanding(0.00f, collision2D, "Crash : Not a Landing Pad :(");
+            // PrintLanding(0.00f, collision2D, "Crash : Not a Landing Pad :(");
             return;
         }
 
         // Check Speed
         if (crashSpeed > safeLandingVelocity)
         {
-            PrintLanding(0.00f, collision2D, "Crash : Landing was too Fast :(");
+            // PrintLanding(0.00f, collision2D, "Crash : Landing was too Fast :(");
             return;
         }
 
         // Check Angle
         if (verticleOffset > safeLandingAngle)
         {
-            PrintLanding(0.00f, collision2D, "Crash : Landing Angle is not Safe :(");
+            // PrintLanding(0.00f, collision2D, "Crash : Landing Angle is not Safe :(");
             return;
         }
 
@@ -226,10 +229,10 @@ public class M_Lander : MonoBehaviour
         landingScore -= verticleOffset / safeLandingAngle * maxAngleEffectOnScore;
         // this varialbe is assigned during the check surface check
         landingScore *= landingPadScript.getScoreMultiplyer();
-        PrintLanding(landingScore, collision2D, "Landed! : Landing was Safe :)");
+        // PrintLanding(landingScore, collision2D, "Landed! : Landing was Safe :)");
 		
 		// Invoke OnLanding Event
-		OnLanding?.Invoke(this, new OnLandingEventArgs { score = landingScore} );
+		OnLanding?.Invoke(this, new OnLandingEventArgs {score = landingScore} );
         return;
     }
 
@@ -278,6 +281,24 @@ public class M_Lander : MonoBehaviour
         //     Angle: " + VisualAngle().ToString("F1")
         // );
     }
+
+	// ---Getters---
+	public float GetSpeedX()
+	{
+		return landerRigidbody2D.linearVelocityX;
+	}
+	public float GetSpeedY()
+	{
+		return landerRigidbody2D.linearVelocityY;
+	}
+	public float GetFuelAmount()
+	{
+		return fuelAmount;
+	}
+	public float GetFuelAmountMax()
+	{
+		return fuelAmountMax;
+	}
 
 
     private float VisualAngle()
